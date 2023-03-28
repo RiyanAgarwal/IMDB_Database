@@ -1,6 +1,6 @@
 CREATE DATABASE IMDB;
-CREATE SCHEMA Foundation;
 USE IMDB;
+CREATE SCHEMA Foundation;
 CREATE TABLE Foundation.Producers
 (
 Id int PRIMARY KEY NOT NULL,
@@ -67,4 +67,4 @@ ALTER TABLE Foundation.Actors ADD CreatedAt Date DEFAULT CAST(GETDATE() AS Date)
 ALTER TABLE Foundation.Producers ADD CreatedAt Date DEFAULT CAST(GETDATE() AS Date),UpdatedAt Date;
 ALTER TABLE Foundation.Actors_Movies ADD CreatedAt Date DEFAULT CAST(GETDATE() AS Date),UpdatedAt Date;
 
-ALTER TABLE Foundation.Movies ADD Profit int, Language varchar;
+ALTER TABLE Foundation.Movies ADD Profit int, Language varchar(50);
