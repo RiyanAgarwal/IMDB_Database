@@ -42,18 +42,20 @@ FROM Foundation.Actors
 ORDER BY Dob DESC
 
 
-SELECT AM1.ActorId AS [First actor],
+SELECT DISTINCT AM1.ActorId AS [First actor],
 	AM2.ActorId AS [Second actor]
 FROM Foundation.Actors_Movies AM1
-	CROSS JOIN Foundation.Actors_Movies AM2
-WHERE AM1.ActorId < AM2.ActorId
-EXCEPT
-SELECT AM1.ActorId,
-	AM2.ActorId
-FROM Foundation.Actors_Movies AM1
-	CROSS JOIN Foundation.Actors_Movies AM2
-WHERE AM1.MovieId = AM2.MovieId 
-	AND AM1.ActorId < AM2.ActorId
+	INNER JOIN Foundation.Actors_Movies AM2
+		ON AM1.ActorId<AM2.ActorId
+	WHERE
+	NOT EXISTS(
+	SELECT AM.MovieId
+	FROM Foundation.Actors_Movies AM
+	WHERE AM.ActorId=AM1.ActorId
+	INTERSECT
+	SELECT AM.MovieId
+	FROM Foundation.Actors_Movies AM
+	WHERE AM.ActorId=AM2.ActorId)
 
 
 SELECT Language,
