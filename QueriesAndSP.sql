@@ -3,17 +3,21 @@ SELECT FirstName+ ' ' + LastName AS Name,
 FROM Foundation.Actors
 
 
-SELECT  DISTINCT A.Id,
-	A.FirstName,
-	A.LastName
-FROM Foundation.Producers P
-	INNER JOIN Foundation.Movies M
-		ON P.Id = M.ProducerId
-	INNER JOIN Foundation.Actors_Movies AM
-		ON M.Id = AM.MovieId
-	INNER JOIN Foundation.Actors A
-		ON A.Id = AM.ActorId
-WHERE P.Id = 2
+CREATE FUNCTION Foundation.ActorsWhoWorkedWithGivenProducer(@ProducerId int)
+RETURNS table
+AS
+RETURN (
+		SELECT DISTINCT A.Id,
+			A.FirstName,
+			A.LastName
+		FROM Foundation.Producers P
+			INNER JOIN Foundation.Movies M
+				ON P.Id = M.ProducerId
+			INNER JOIN Foundation.Actors_Movies AM
+				ON M.Id = AM.MovieId
+			INNER JOIN Foundation.Actors A
+				ON A.Id = AM.ActorId
+		WHERE P.Id = @ProducerId)
 
 
 SELECT AM1.ActorId AS [First actor],
@@ -64,13 +68,17 @@ FROM Foundation.Movies
 GROUP BY Language
 
 
-SELECT Language,
-	SUM(Profit) AS [Total profit]
-FROM Foundation.Movies M
-	INNER JOIN Foundation.Actors_Movies AM
-		ON M.Id = AM.MovieId
-WHERE AM.ActorId=1
-GROUP BY Language
+CREATE FUNCTION ProfitByActorInEachLanguage(@ActorId int)
+RETURNS table
+AS
+RETURN(
+	SELECT Language,
+		SUM(Profit) AS [Total profit]
+	FROM Foundation.Movies M
+		INNER JOIN Foundation.Actors_Movies AM
+			ON M.Id = AM.MovieId
+	WHERE AM.ActorId=@ActorId
+	GROUP BY Language)
 
 
 CREATE PROC Foundation.usp_insert_Movie
