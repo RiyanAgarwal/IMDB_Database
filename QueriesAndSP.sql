@@ -83,6 +83,17 @@ RETURN(
 	GROUP BY Language)
 
 
+ALTER TABLE Foundation.Actors_Movies
+ADD Id_new int IDENTITY
+
+ALTER TABLE Foundation.Actors_Movies
+DROP PRIMARY KEY
+
+ALTER TABLE Foundation.Actors_Movies
+DROP COLUMN Id
+
+EXEC sp_rename 'Foundation.Actors_Movies.Id_new', 'Id', 'COLUMN';
+
 CREATE PROC Foundation.usp_insert_Movie
 @Id int,
 @Name varchar(50),
@@ -97,16 +108,13 @@ AS
 INSERT INTO 
 	Foundation.Movies(Id,Name,Plot,YearOfRelease,Poster,ProducerId,Profit,UpdatedAt,Language) 
 	VALUES(@Id,@Name,@Plot,@Year,@Poster,@ProducerId,@Profit,Null,@Language)
-DECLARE @MaxId int
-SELECT @MaxId=MAX(Id)
 FROM Foundation.Actors_Movies
 INSERT INTO 
-	Foundation.Actors_Movies(Id,MovieId,ActorId,UpdatedAt)
-SELECT @MaxId+ordinal,
-	@Id,
+	Foundation.Actors_Movies(MovieId,ActorId,UpdatedAt)
+SELECT @Id,
 	value,
 	NULL
-FROM string_split(@ActorList,',',1)
+FROM string_split(@ActorList,',',1))
 
 
 CREATE PROC Foundation.usp_delete_Movie
