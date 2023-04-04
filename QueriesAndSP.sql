@@ -18,6 +18,8 @@ RETURN (
 			INNER JOIN Foundation.Actors A
 				ON A.Id = AM.ActorId
 		WHERE P.Id = @ProducerId)
+SELECT *
+FROM Foundation.ActorsWhoWorkedWithGivenProducer(1)
 
 
 SELECT AM1.ActorId AS [First actor],
@@ -31,8 +33,7 @@ Group by Am1.ActorId,
 HAVING COUNT(*)>=2
 
 
-SELECT TOP 1 
-	Id,
+SELECT TOP 1
 	FirstName,
 	LastName,
 	Bio,
@@ -80,22 +81,13 @@ RETURN(
 		INNER JOIN Foundation.Actors_Movies AM
 			ON M.Id = AM.MovieId
 	WHERE AM.ActorId=@ActorId
-	GROUP BY Language)
+	GROUP BY Language);
 
+SELECT *
+FROM ProfitByActorInEachLanguage(1)
 
-ALTER TABLE Foundation.Actors_Movies
-ADD Id_new int IDENTITY
-
-ALTER TABLE Foundation.Actors_Movies
-DROP PRIMARY KEY
-
-ALTER TABLE Foundation.Actors_Movies
-DROP COLUMN Id
-
-EXEC sp_rename 'Foundation.Actors_Movies.Id_new', 'Id', 'COLUMN';
 
 CREATE PROC Foundation.usp_insert_Movie
-@Id int,
 @Name varchar(50),
 @Plot varchar(50),
 @Year int,
@@ -106,15 +98,16 @@ CREATE PROC Foundation.usp_insert_Movie
 @ActorList varchar(50)
 AS
 INSERT INTO 
-	Foundation.Movies(Id,Name,Plot,YearOfRelease,Poster,ProducerId,Profit,UpdatedAt,Language) 
-	VALUES(@Id,@Name,@Plot,@Year,@Poster,@ProducerId,@Profit,Null,@Language)
-FROM Foundation.Actors_Movies
-INSERT INTO 
+	Foundation.Movies(Name,Plot,YearOfRelease,Poster,ProducerId,Profit,UpdatedAt,Language) 
+	VALUES(@Name,@Plot,@Year,@Poster,@ProducerId,@Profit,Null,@Language)
+INSERT INTO
 	Foundation.Actors_Movies(MovieId,ActorId,UpdatedAt)
-SELECT @Id,
+SELECT SCOPE_IDENTITY(),
 	value,
 	NULL
-FROM string_split(@ActorList,',',1))
+FROM string_split(@ActorList,',',1)
+
+EXEC Foundation.usp_insert_Movie 'Fast and furious','plot',2008,'www.poster.com',1,500,'English','2,3,4'
 
 
 CREATE PROC Foundation.usp_delete_Movie
@@ -124,6 +117,8 @@ DELETE FROM Foundation.Actors_Movies
 WHERE MovieId = @Id;
 DELETE FROM Foundation.Movies
 WHERE Id = @Id;
+
+EXEC Foundation.usp_delete_Movie 6
 
 
 CREATE PROC Foundation.usp_delete_Producer
@@ -146,6 +141,8 @@ END
 DELETE FROM Foundation.Producers
 WHERE Id = @Id
 
+EXEC Foundation.usp_delete_Producer 3
+
 
 CREATE PROC Foundation.usp_delete_Actor
 @Id int
@@ -154,3 +151,5 @@ DELETE FROM Foundation.Actors_Movies
 WHERE @Id=ActorId
 DELETE FROM Foundation.Actors
 WHERE @Id=Id
+
+EXEC Foundation.usp_delete_Actor 4
